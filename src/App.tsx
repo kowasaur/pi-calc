@@ -1,25 +1,50 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useRef } from "react";
 
 function App() {
+  const [pi, setPi] = useState(1);
+  const [delay, setDelay] = useState(30);
+  const [hasStarted, setHasStarted] = useState(false);
+  const sliderRef = useRef<HTMLInputElement>(null);
+
+  function calculate(denominator: number, doAdd: boolean) {
+    // If I just used delay, it doesn't update
+    const lDelay = Number(sliderRef.current?.value) ** 2;
+
+    const newDen = denominator + 2;
+
+    const change = doAdd ? 1 / newDen : -1 / newDen;
+
+    setPi(pi => pi + change);
+
+    setTimeout(() => {
+      calculate(newDen, !doAdd);
+      // It's NaN the first time
+    }, lDelay || 30 ** 2);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <h1>{pi * 4}</h1>
+      {hasStarted ? (
+        <input
+          type="range"
+          min="0.001"
+          max="50"
+          onChange={d => setDelay(Number(d.target.value))}
+          value={delay}
+          ref={sliderRef}
+        />
+      ) : (
+        <button
+          onClick={() => {
+            setHasStarted(true);
+            calculate(1, false);
+          }}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          start
+        </button>
+      )}
+    </>
   );
 }
 
